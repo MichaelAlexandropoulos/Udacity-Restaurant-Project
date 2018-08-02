@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3367D6"/>
+  <link rel="stylesheet" src="/normalize-css.googlecode.com/svn/trunk/normalize.css" />
+  <!-- <link rel="stylesheet" href="css/styles.css" /> -->
+  <style>
+@charset "utf-8";*,body{margin:0}body,li,p,td,th,ul{color:#333;font-family:Arial,Helvetica,sans-serif}body,h1,h2,h3,h4,h5,h6,li,p,td,th,ul{font-family:Arial,Helvetica,sans-serif}#map,#map-container{height:400px;width:100%}#restaurants-list li a,*,a,a:focus,a:hover{text-decoration:none}#footer,#restaurants-list,.InfoDiv,nav{text-align:center}#footer,#restaurants-list li a,#restaurants-list li h1,nav h1 a{text-transform:uppercase}*{border-width:0;border-style:none;padding:0;outline:0;box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;z-index:0}body,p,td,th{font-size:16pt;line-height:1.2em}body{background-color:#444;width:100%;height:100vh;position:relative}li,ul{font-size:10pt}a{color:orange}a:focus,a:hover{color:#3397db}.skip-link,.skip-link:focus{background-color:#252831;color:#252831}a img{border:0 #fff}.DivResizer{clear:both}#header{width:100%;background-color:#252831;position:fixed;top:0;z-index:999}.skip-link{position:absolute;top:-40px;left:0;z-index:100}.skip-link:focus{top:0}nav{display:block;width:100%;height:80px}nav h1 a{color:#fff;font-weight:100;letter-spacing:5px;display:block;font-size:.5em;line-height:80px;margin:auto}nav h1 a:focus,nav h1 a:hover{color:#fff;text-decoration:none}#maincontent{display:flex;flex-wrap:wrap;width:100%;margin-top:80px;background-color:#f3f3f3}#map-container{display:block;background-color:#ccc;order:1}#restaurant-filtering{display:block;width:100%;order:2}.filter-options{width:100%;padding:10px;background:#14598A}.filter-options h2{color:#fff;font-size:1em;font-weight:400;line-height:1em;margin-bottom:10px}.filter-fields{display:block;width:100%;height:34px;padding:6px 12px;font-size:16px;line-height:1.42857143;color:#000;background-color:#fff;border:1px solid #ccc;border-radius:4px;margin-bottom:10px}.filter-fields:last-child{margin-bottom:0}#restaurants-list{list-style:none;margin:0;padding:1em}#restaurants-list li{display:block;background-color:#fff;border:2px solid #ccc;font-family:Arial,sans-serif;margin-bottom:1em;margin-left:auto;margin-right:auto;min-height:380px;padding:10px;text-align:left;width:100%;max-width:295px}#restaurants-list .restaurant-img{background-color:#ccc;display:block;margin:0;max-width:100%;min-height:248px;min-width:100%}#restaurants-list li h1{color:#454545;font-family:Arial,sans-serif;font-size:14pt;font-weight:200;letter-spacing:0;line-height:1.3;margin:20px 0 10px}#restaurants-list p{margin:0;font-size:11pt}#restaurants-list li a,.InfoBtn{margin-left:auto;margin-right:auto;color:#000000}#restaurants-list li a{background-color:orange;border-bottom:3px solid #eee;display:block;width:180px;font-size:16px;margin-top:1em;padding:20px;text-align:center}.InfoDiv{display:none;position:fixed;top:90vh;width:100%;line-height:75px;background:rgba(0,0,0,.3);padding:10px;z-index:999}.InfoBtn{display:block;padding:10px;background:#14598A;color: #FFF;font-size:20px;cursor:pointer}#footer{display:block;width:100%;background-color:#444;color:#E0E0E0;font-size:.6em;letter-spacing:1px;padding:14px;margin:0}@media screen and (min-width:500px){nav h1 a{font-size:.8em}.filter-fields{display:inline-block;max-width:45%;height:34px;margin-bottom:0;margin-left:5px;margin-right:5px;float:left}}@media screen and (min-width:750px){#header{z-index:0;position:relative}nav{height:50px;text-align:center}nav h1 a{line-height:50px}#maincontent{margin-top:0}.filter-fields{width:225px}#restaurant-filtering{width:50%;height:89vh;overflow:auto;order:1}#restaurants-list{height:auto;overflow:auto}#restaurants-list li{float:left;margin-left:5px;margin-right:5px}#map-container{height:89vh;width:50%;order:2}#map{height:100%}}
+  </style>
+  <title>Restaurant Reviews</title>
+</head>
+
+<body>
+  <header id="header">
+    <a href="#restaurants-list" class="skip-link" aria-label="Go to restaurant list">List</a>
+    <nav>
+      <h1><a class="header-home-click" href="index.html">Restaurant Reviews</a></h1>
+    </nav>
+  </header>
+  <main id="maincontent">
+    <section id="map-container">
+      <div id="map"></div>
+    </section>
+    <section id="restaurant-filtering">
+      <div id="filter-form" class="filter-options">
+        <h2>Filter Results</h2>
+        <select id="neighborhoods-select" name="neighborhoods" class="filter-fields" aria-label="Select neighborhood" onchange="FilterRestaurants()">
+          <option value="all">All Neighborhoods</option>
+        </select>
+        <select id="cuisines-select" name="cuisines" class="filter-fields" aria-label="Select cuisine type" onchange="FilterRestaurants()">
+          <option value="all">All Cuisines</option>
+        </select>
+        <div class="DivResizer"></div>
+      </div>
+      <ul id="restaurants-list" tabindex="-1"></ul>
+    </section>
+  </main>
+  <div id="UpdateInfoDiv" class="InfoDiv">
+    <input type="submit" id="UpdateInfoBtn" class="InfoBtn" title="Refresh Page" tabindex="0" aria-label="Refresh Page" value="Refresh Page">
+  </div>
+  <footer id="footer">
+    Copyright (c) 2017 - 2018 <a href="index.html"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
+  </footer>
+  <!-- Javascripts -->
+  <script async defer type="application/javascript" charset="utf-8" src="js/blazy.js"></script>
+  <script async defer type="application/javascript" charset="utf-8" src="js/main.js"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCILgW0ZeXat9IafQhMxuxSnh5hQS5ey68&libraries=places"></script>
+</body>
+
+</html>
