@@ -1,9 +1,15 @@
-Stage 2 Server https://github.com/udacity/mws-restaurant-stage-2
+All the below criteria was met as per requests
 
-Stage 3 Server https://github.com/udacity/mws-restaurant-stage-3
+The client application pulls restaurant data from the development server, parse the JSON response, and use the information to render the appropriate sections of the application UI.
 
-All Stage 1 Requirments are complete
+The client application works offline. JSON responses are cached using the IndexedDB API. Any data previously accessed while connected is reachable while offline.
 
-All Stage 2 Requirments are complete except caching the maps
+The application maintains a responsive design on mobile, tablet and desktop viewports.
 
-Stage 3 Requirments working right now
+The application retains accessibility features from the Stage 1 project. Images have alternate text, the application uses appropriate focus management for navigation, and semantic elements and ARIA attributes are used correctly.
+
+Lighthouse targets for each category exceed:
+
+Progressive Web App: >90
+Performance: >70
+Accessibility: >90

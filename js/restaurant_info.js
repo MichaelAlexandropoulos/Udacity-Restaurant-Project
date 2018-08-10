@@ -25,6 +25,7 @@ window.onload = function() {
         fillBreadcrumb(response.data);
         // Creating the restaurant information
         displayRestaurantInfo(response.data);
+        initMap(response.data);
   		};
   	}
   }
@@ -168,6 +169,38 @@ function createReviewHTML(review) {
   li.appendChild(datadiv);
 
   return li;
+}
+/* -------------------------------------------------------------------------- */
+/**
+ * Initialize Google map, called from HTML.
+ */
+function initMap(restaurant) {
+  let loc = {
+    lat: 40.722216,
+    lng: -73.987501
+  };
+  self.map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 12,
+    center: loc,
+    scrollwheel: false
+  });
+  var markers = [];
+  // Add marker to the map
+  var marker = mapMarkerForRestaurant(restaurant, self.map);
+  google.maps.event.addListener(marker, 'click', () => {
+    window.location.href = marker.url
+  });
+  markers.push(marker);
+}
+function mapMarkerForRestaurant(restaurant, map) {
+  var marker = new google.maps.Marker({
+    position: restaurant.latlng,
+    title: restaurant.name,
+    url: `./restaurant.html?id=${restaurant.id}`,
+    map: map,
+    animation: google.maps.Animation.DROP}
+  );
+  return marker;
 }
 /* -------------------------------------------------------------------------- */
 // Get the modal

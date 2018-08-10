@@ -173,6 +173,30 @@ function initMap(restaurants) {
     center: loc,
     scrollwheel: false
   });
+  var markers = [];
+  restaurants.forEach(restaurant => {
+    // Add marker to the map
+    var marker = mapMarkerForRestaurant(restaurant, self.map);
+    google.maps.event.addListener(marker, 'click', () => {
+      window.location.href = marker.url
+    });
+    markers.push(marker);
+  });
+
+}
+function mapMarkerForRestaurant(restaurant, map) {
+  var marker = new google.maps.Marker({
+    position: restaurant.latlng,
+    title: restaurant.name,
+    url: `./restaurant.html?id=${restaurant.id}`,
+    map: map,
+    animation: google.maps.Animation.DROP}
+  );
+  return marker;
+}
+
+
+  /*
   if (window.Worker) {
 		var myWorker = new Worker("js/workers/init_worker.js");
     // Posting the request message to the web worker
@@ -183,7 +207,8 @@ function initMap(restaurants) {
       console.log(response.data);
 		};
 	}
-}
+  */
+
 /* -------------------------------------------------------------------------- */
 /**
  * Refreshing the page to get the new data
