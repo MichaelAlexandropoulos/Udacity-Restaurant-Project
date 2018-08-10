@@ -156,6 +156,7 @@ function FilterRestaurants() {
       var neighborhood = nSelect[nIndex].value;
 
       fetchRestaurantsEntries(response.data, neighborhood, cuisine);
+      var bLazy = new Blazy();
 		};
 	}
 }
