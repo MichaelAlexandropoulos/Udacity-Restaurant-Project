@@ -185,8 +185,10 @@ function initMap(restaurants) {
 
 }
 function mapMarkerForRestaurant(restaurant, map) {
+  var latlng = restaurant.latlng;
+  if ((typeof latlng) === 'string') { latlng = JSON.parse(latlng); }
   var marker = new google.maps.Marker({
-    position: restaurant.latlng,
+    position: latlng,
     title: restaurant.name,
     url: `./restaurant.html?id=${restaurant.id}`,
     map: map,
