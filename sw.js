@@ -21,6 +21,9 @@ self.addEventListener('install', function(event) {
     'img/8.jpg',
     'img/9.jpg',
     'img/10.jpg',
+    'img/add-icon.png',
+    'img/fav-icon.png',
+    'img/nofav-icon.png',
     'img/undefined.jpg'
   ];
   event.waitUntil(

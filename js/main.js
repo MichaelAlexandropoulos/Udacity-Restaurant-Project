@@ -113,7 +113,11 @@ function fetchRestaurantsEntries(restaurants, fltrHood='all', fltrCuisine='all')
     li.append(image);
 
     var name = document.createElement('h1');
-    name.innerHTML = restaurant.name;
+    if (restaurant.is_favorite) {
+      name.innerHTML =  '<img class="FavIcon" src="img/fav-icon.png" alt="Favorite Restaurant" title="Favorite Restaurant">' + restaurant.name;
+    } else {
+      name.innerHTML = restaurant.name;
+    }
     li.append(name);
 
     var neighborhood = document.createElement('p');
@@ -197,21 +201,6 @@ function mapMarkerForRestaurant(restaurant, map) {
   );
   return marker;
 }
-
-
-  /*
-  if (window.Worker) {
-		var myWorker = new Worker("js/workers/init_worker.js");
-    // Posting the request message to the web worker
-		myWorker.postMessage('LoadGoogleMapView');
-    // Getting a response from web worker
-		myWorker.onmessage = function(response) {
-      // Creating Neighborhoods Options
-      console.log(response.data);
-		};
-	}
-  */
-
 /* -------------------------------------------------------------------------- */
 /**
  * Refreshing the page to get the new data

@@ -22,10 +22,10 @@ window.onload = function() {
       // Getting a response from web worker
   		myWorker.onmessage = function(response) {
         // Creating Breadcrumb
-        fillBreadcrumb(response.data);
+        fillBreadcrumb(response.data[0]);
         // Creating the restaurant information
-        displayRestaurantInfo(response.data);
-        initMap(response.data);
+        displayRestaurantInfo(response.data[0],response.data[1]);
+        initMap(response.data[0]);
   		};
   	}
   }
@@ -60,7 +60,7 @@ function fillBreadcrumb(restaurant) {
 /**
  * Creates the display of the restaurant information page.
  */
-function displayRestaurantInfo(restaurant) {
+function displayRestaurantInfo(restaurant,reviews) {
   // creating basic info
   var name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
@@ -79,8 +79,13 @@ function displayRestaurantInfo(restaurant) {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML(restaurant.operating_hours);
   }
+  // Checking to see what button to display
+  var favbtn = 'BtnRemoveFav';
+  if (!restaurant.is_favorite) { favbtn = 'BtnMakeFav'; }
+  document.getElementById(favbtn).style.display = 'block';
+
   // filling reviews
-  fillReviewsHTML(restaurant.reviews);
+  fillReviewsHTML(reviews);
 }
 /* -------------------------------------------------------------------------- */
 /**
@@ -236,4 +241,82 @@ svBtn.addEventListener('keydown', function(e) {
     nmFld.focus();
   }
 });
+/* -------------------------------------------------------------------------- */
+var AddFavBtn = document.getElementById("BtnMakeFav");
+AddFavBtn.onclick = function() {
+  var id = window.location.href;
+  id = id.split('?id=');
+  id = id[1];
+
+  if (window.Worker) {
+    var myWorker = new Worker("js/workers/info_worker.js");
+    // Posting the request message to the web worker
+    myWorker.postMessage(['AddFavoriteRestaurant',id]);
+    // Getting a response from web worker
+    myWorker.onmessage = function(response) {
+      // Creating Breadcrumb
+      document.getElementById('BtnMakeFav').style.display = 'none';
+      document.getElementById('BtnRemoveFav').style.display = 'block';
+    };
+  }
+}
+/* -------------------------------------------------------------------------- */
+var RemFavBtn = document.getElementById("BtnRemoveFav");
+RemFavBtn.onclick = function() {
+  var id = window.location.href;
+  id = id.split('?id=');
+  id = id[1];
+
+  if (window.Worker) {
+    var myWorker = new Worker("js/workers/info_worker.js");
+    // Posting the request message to the web worker
+    myWorker.postMessage(['RemoveFavoriteRestaurant',id]);
+    // Getting a response from web worker
+    myWorker.onmessage = function(response) {
+      // Creating Breadcrumb
+      if (response.data === 'OK') {
+        document.getElementById('BtnRemoveFav').style.display = 'none';
+        document.getElementById('BtnMakeFav').style.display = 'block';
+      }
+    };
+  }
+}
+/* -------------------------------------------------------------------------- */
+var SaveBtn = document.getElementById("AcceptBtn");
+SaveBtn.onclick = function() {
+  var Err = false;
+  var id = window.location.href;
+  id = id.split('?id=');
+  id = id[1];
+  var name = document.getElementById("NameField").value;
+  var rating = document.getElementById("RatingField").value;
+  var review = document.getElementById("ReviewField").value;
+  if (name === '') {
+    document.getElementById("NameField").classList.add("EmptyField");
+    Err = true;
+  }
+  if (review === '') {
+    document.getElementById("ReviewField").classList.add("EmptyField");
+    Err = true;
+  }
+  if (!Err) {
+    entry = {
+      "restaurant_id": id,
+      "name": name,
+      "rating": rating,
+      "comments": review
+    }
+
+    /* HERE IS THE UPDATE
+    fetch('http://localhost:1337/reviews/', {
+      method: 'post',
+      body: JSON.stringify(entry)
+    }).then(function(response) {
+      return response.json();
+    }).then(function(data) {
+      console.log(data);
+    });
+    */
+  }
+}
 /* -------------------------------------------------------------------------- */
