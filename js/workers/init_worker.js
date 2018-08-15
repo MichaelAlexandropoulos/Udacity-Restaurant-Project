@@ -14,7 +14,7 @@ function CreateDataBase() {
       case 1:
         var RevTbl = upgradeDB.createObjectStore('Reviews', {keyPath: 'id'});
         RevTbl.createIndex('restaurant_id', 'restaurant_id', {unique: false});
-      case 0:
+      case 2:
         var FavTbl = upgradeDB.createObjectStore('Favorites', {keyPath: 'name'});
     }
   });
@@ -88,6 +88,20 @@ function CheckFavorite(json) {
     postMessage(json);
   });
 }
+// Reads and saves the reviews in the DB no post message is needed here.
+function LoadRestaurantReviews(json) {
+  for(var i = 0; i < json.length; i++) {
+    var RequestID = ReviewsURL + '/?restaurant_id=' + json[i].id;
+    fetch(RequestID)
+    .then(function(data) { return data.json(); })
+    .then(function(json) {
+      InsertValuesToDataBase('Reviews',json);
+    })
+    .catch(function(error) {
+      //console.log(error,'cached data for restaurant reviews');
+    });
+  }
+}
 // Load Restaurant Data
 function LoadRestaurantData() {
   fetch(ReqURL)
@@ -96,10 +110,10 @@ function LoadRestaurantData() {
     CreateDataBase();
     CheckFavorite(json);
     InsertValuesToDataBase('Restaurants',json);
+    LoadRestaurantReviews(json);
   })
   .catch(function(error) {
     CreateDataBase();
-    console.log(error,'Online request for '+ReqURL+' failed. Falling back to cached data');
     var dbPromise = idb.open('DB-Restaurants');
     dbPromise.then(function(db) {
       var tx = db.transaction('Restaurants', 'readonly');
@@ -111,40 +125,45 @@ function LoadRestaurantData() {
         json.push(DataSet[i].data);
       }
       CheckFavorite(json);
+      LoadRestaurantReviews(json);
     });
-  });
-}
-// Reads and saves the reviews in the DB no post message is needed here.
-function LoadRestaurantReviews() {
-  fetch(ReviewsURL)
-  .then(function(data) { return data.json(); })
-  .then(function(json) {
-    CreateDataBase();
-    InsertValuesToDataBase('Reviews',json);
-  })
-  .catch(function(error) {
-    console.log(error,'Online request for '+ReviewsURL+' failed. Falling back to cached data');
   });
 }
 // checking to see if there are any updates to the data and returns either the
 // data or a no need to update message
 function UpdateRestaurantData() {
-  fetch(ReqURL)
-  .then(function(data) { return data.json(); })
-  .then(function(json) {
-    postMessage(json);
-    InsertValuesToDataBase('Restaurants',json);
-  })
-  .catch(function(error) {
-    postMessage('OffLine');
-  });
-  fetch(ReviewsURL)
-  .then(function(data) { return data.json(); })
-  .then(function(json) {
-    InsertValuesToDataBase('Reviews',json);
-  })
-  .catch(function(error) {
-    console.log('OffLine reviews only');
+  var dbPromise = idb.open('DB-Restaurants');
+  dbPromise.then(function(db) {
+    var tx = db.transaction('Reviews', 'readonly');
+    var store = tx.objectStore('Reviews');
+    return store.getAll();
+  }).then(function(DataSet) {
+    var check = false;
+    var json = [];
+    for (var i = 0; i < DataSet.length; i++) {
+      if (DataSet[i].data.updated == true) {
+        var review = {
+          "restaurant_id": DataSet[i].data.restaurant_id,
+          "name": DataSet[i].data.name,
+          "rating": DataSet[i].data.rating,
+          "comments": DataSet[i].data.comments
+        }
+        json.push(review);
+        check = true;
+      }
+    }
+    if (check) {
+      fetch(ReviewsURL+'/', { method: 'post', body: JSON.stringify(json)})
+      .then(function(response) { return response.json(); })
+      .then(function(json) {
+        postMessage(json);
+      })
+      .catch(function(error) {
+        postMessage('Offline');
+      });
+    } else {
+      postMessage('Offline');
+    }
   });
 }
 // The main onmessage function this is where we get the data from the main js file
@@ -154,7 +173,6 @@ onmessage = function(Request) {
   switch(Action) {
     case 'LoadRestaurantsList':
       LoadRestaurantData();
-      LoadRestaurantReviews();
       break;
     case 'UpdateRestaurantsList':
       UpdateRestaurantData();

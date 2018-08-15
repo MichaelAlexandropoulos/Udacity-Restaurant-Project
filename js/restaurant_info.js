@@ -63,7 +63,11 @@ function fillBreadcrumb(restaurant) {
 function displayRestaurantInfo(restaurant,reviews) {
   // creating basic info
   var name = document.getElementById('restaurant-name');
-  name.innerHTML = restaurant.name;
+  if (restaurant.is_favorite) {
+    name.innerHTML = restaurant.name + '<img class="FavIcon" src="img/fav-icon.png" alt="Favorite Restaurant" title="Favorite Restaurant">';
+  } else {
+    name.innerHTML = restaurant.name;
+  }
   var address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
   var image = document.getElementById('restaurant-img');
@@ -136,6 +140,24 @@ function fillReviewsHTML(reviews) {
 /**
  * Create review HTML and add it to the webpage.
  */
+Date.prototype.getUnixTime = function() { return this.getTime()/1000|0 };
+
+function timeConverter(UNIX_timestamp){
+ var a = new Date(UNIX_timestamp * 1000);
+ var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ var year = a.getFullYear();
+ if (year > 2018) {
+   var dt = new Date();
+   year = dt.getFullYear();
+ }
+ var month = months[a.getMonth()];
+ var date = a.getDate();
+ var hour = a.getHours();
+ var min = a.getMinutes();
+ var sec = a.getSeconds();
+ var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min;
+ return time;
+}
 function createReviewHTML(review) {
   var li = document.createElement('li');
   li.classList.add('review-card');
@@ -153,7 +175,17 @@ function createReviewHTML(review) {
 
   var date = document.createElement('span');
   date.classList.add('review-date');
-  date.innerHTML = review.date;
+  var mydate = review.updatedAt;
+  if (mydate !== '') {
+    if (isNaN(mydate)) {
+      var d = new Date();
+      mydate = new Date(d.toDateString()).getUnixTime();
+    }
+    mydate = timeConverter(mydate);
+  } else {
+    mydate = 'Updating ...';
+  }
+  date.innerHTML = mydate;
   infodiv.appendChild(date);
   infodiv.appendChild(resizer);
 
@@ -247,16 +279,17 @@ AddFavBtn.onclick = function() {
   var id = window.location.href;
   id = id.split('?id=');
   id = id[1];
-
   if (window.Worker) {
     var myWorker = new Worker("js/workers/info_worker.js");
     // Posting the request message to the web worker
     myWorker.postMessage(['AddFavoriteRestaurant',id]);
     // Getting a response from web worker
     myWorker.onmessage = function(response) {
-      // Creating Breadcrumb
       document.getElementById('BtnMakeFav').style.display = 'none';
       document.getElementById('BtnRemoveFav').style.display = 'block';
+
+      var name = document.getElementById('restaurant-name');
+      name.innerHTML = name.innerHTML + '<img class="FavIcon" src="img/fav-icon.png" alt="Favorite Restaurant" title="Favorite Restaurant">';
     };
   }
 }
@@ -266,17 +299,19 @@ RemFavBtn.onclick = function() {
   var id = window.location.href;
   id = id.split('?id=');
   id = id[1];
-
   if (window.Worker) {
     var myWorker = new Worker("js/workers/info_worker.js");
     // Posting the request message to the web worker
     myWorker.postMessage(['RemoveFavoriteRestaurant',id]);
     // Getting a response from web worker
     myWorker.onmessage = function(response) {
-      // Creating Breadcrumb
       if (response.data === 'OK') {
         document.getElementById('BtnRemoveFav').style.display = 'none';
         document.getElementById('BtnMakeFav').style.display = 'block';
+
+        var name = document.getElementById('restaurant-name');
+        var nameStr = name.innerHTML;
+        name.innerHTML = nameStr.replace('<img class="FavIcon" src="img/fav-icon.png" alt="Favorite Restaurant" title="Favorite Restaurant">','');
       }
     };
   }
@@ -299,24 +334,44 @@ SaveBtn.onclick = function() {
     document.getElementById("ReviewField").classList.add("EmptyField");
     Err = true;
   }
+
   if (!Err) {
-    entry = {
+    review = {
+      "id": '',
       "restaurant_id": id,
+      "updated": false,
       "name": name,
       "rating": rating,
       "comments": review
     }
+    var ul = document.getElementById('reviews-list');
+    ul.appendChild(createReviewHTML(review));
+    modal.style.display = "none";
 
-    /* HERE IS THE UPDATE
-    fetch('http://localhost:1337/reviews/', {
-      method: 'post',
-      body: JSON.stringify(entry)
-    }).then(function(response) {
-      return response.json();
-    }).then(function(data) {
-      console.log(data);
-    });
-    */
+    if (window.Worker) {
+      var myWorker = new Worker("js/workers/info_worker.js");
+      // Posting the request message to the web worker
+      myWorker.postMessage(['UpdateReviews',review]);
+      // Getting a response from web worker
+      myWorker.onmessage = function(response) {
+      };
+    }
   }
 }
 /* -------------------------------------------------------------------------- */
+// Runs every 30 seconds and checks what (if any) new info must be displayed.
+setInterval(function() {
+  if (window.Worker) {
+		var myWorker = new Worker("js/workers/info_worker.js");
+    // Posting the request message to the web worker
+		myWorker.postMessage('UpdateRestaurantPage');
+    // Getting a response from web worker
+		myWorker.onmessage = function(response) {
+      if (response.data !== 'Offline') {
+        console.log('Updated values for', response.data);
+      } else {
+        console.log('OffLine use for now!');
+      }
+		};
+	}
+}, 30000); // (1 minute = 60000) so this is 30 seconds

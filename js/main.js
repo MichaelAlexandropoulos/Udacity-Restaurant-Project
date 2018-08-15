@@ -17,7 +17,6 @@ window.onload = function() {
 		myWorker.postMessage('LoadRestaurantsList');
     // Getting a response from web worker
 		myWorker.onmessage = function(response) {
-			OldData = response.data;
       // Creating Neighborhoods Options
       fetchRestaurantsOptions('neighborhoods',response.data);
       // Creating Cuisines Options
@@ -29,7 +28,7 @@ window.onload = function() {
 	}
 };
 /* -------------------------------------------------------------------------- */
-// Runs every 1 minute and checks what (if any) new info must be displayed.
+// Runs every 30 seconds and checks what (if any) new info must be displayed.
 setInterval(function() {
   if (window.Worker) {
 		var myWorker = new Worker("js/workers/init_worker.js");
@@ -37,16 +36,15 @@ setInterval(function() {
 		myWorker.postMessage('UpdateRestaurantsList');
     // Getting a response from web worker
 		myWorker.onmessage = function(response) {
-      if (response.data !== 'OffLine') {
-        var d = new Date();
-        console.log('last updated at ',d.toDateString());
+      if (response.data !== 'Offline') {
         document.getElementById('UpdateInfoDiv').style.display = "block";
-      }else {
+      } else {
+        document.getElementById('UpdateInfoDiv').style.display = "none";
         console.log('OffLine use for now!');
       }
 		};
 	}
-}, 60000); // Every 1 minute
+}, 30000); // (1 minute = 60000) so this is 30 seconds
 /* -------------------------------------------------------------------------- */
 /*
  * Creates the options for the select elements of the index.html with minimal
