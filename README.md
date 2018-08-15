@@ -1,6 +1,18 @@
 STAGE 3 of the Restaurant Project
 
-All the below criteria was met as per requests
+V 1.1 Requires Changes FIXES
+--I'm able to mark a restaurant favourite while offline, and I can even "submit" a review and it will show up in the list, however, if I refresh the page before going back online, I get the dinosaur :/
+The app should behave offline exactly as it does online, except for maybe some UI to say "this review is pending until you reconnect" or something similar. FIXED
+
+--The button controls and form elements should use semantic elements. See code review. FIXED
+
+--The accessibility score on the restaurant page is 85. There's no reason not to get 100% on both pages. Make sure images all have alt tags (and they should be descriptive) FIXED (went up to 92 unfortunately the google map is a problem)
+
+-- All code remarks marked as required FIXED
+  NOTE I am not using the form element in the dialog window on purpose. I know it is not the best practice but it serves me very well in this particular example
+
+
+V 1.0 All the below criteria was met as per requests
 
 -- Users are able to mark a restaurant as a favorite, this toggle is visible in the application.
 

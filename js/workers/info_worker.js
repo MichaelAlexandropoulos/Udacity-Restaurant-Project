@@ -1,6 +1,5 @@
 'use strict';
 importScripts('idb.js');
-
 const ReqURL = 'http://localhost:1337/restaurants';
 const ReviewsURL = 'http://localhost:1337/reviews';
 // Inserting Values to the DataBase
@@ -195,7 +194,7 @@ function UpdateRestaurantsReviews(RevData) {
 }
 // checking to see if there are any updates to the data and returns either the
 // data or a no need to update message
-function UpdateRestaurantPageReviews() {
+function UpdateRestaurantPageReviews(RestID) {
   var dbPromise = idb.open('DB-Restaurants');
   dbPromise.then(function(db) {
     var tx = db.transaction('Reviews', 'readonly');
@@ -220,13 +219,16 @@ function UpdateRestaurantPageReviews() {
       fetch(ReviewsURL+'/', { method: 'post', body: JSON.stringify(json)})
       .then(function(response) { return response.json(); })
       .then(function(json) {
-        postMessage(json);
+        if (RestID === 'NONE') { postMessage(json); }
+          else { LoadRestaurantData(RestID); }
       })
       .catch(function(error) {
-        postMessage('Offline');
+        if (RestID === 'NONE') { postMessage('Offline'); }
+          else { LoadRestaurantData(RestID); }
       });
     } else {
-      postMessage('Offline');
+      if (RestID === 'NONE') { postMessage('Offline'); }
+        else { LoadRestaurantData(RestID); }
     }
   });
 }
@@ -237,7 +239,13 @@ onmessage = function(Request) {
   var id = Request.data[1];
   switch(Action) {
     case 'LoadRestaurantData':
-      LoadRestaurantData(id);
+      UpdateRestaurantPageReviews(id);
+      break;
+    case 'UpdateRestaurantPage':
+      UpdateRestaurantPageReviews('NONE');
+      break;
+    case 'UpdateReviews':
+      UpdateRestaurantsReviews(id);
       break;
     case 'AddFavoriteRestaurant':
       var dbPromise = idb.open('DB-Restaurants');
@@ -288,12 +296,6 @@ onmessage = function(Request) {
         InsertValuesToDataBase('Restaurants',json);
         UpdateFavorites(DataSet.data.name,false);
       });
-      break;
-    case 'UpdateReviews':
-      UpdateRestaurantsReviews(id);
-      break;
-    case 'UpdateRestaurantPage':
-      UpdateRestaurantPageReviews();
       break;
   }
 }
