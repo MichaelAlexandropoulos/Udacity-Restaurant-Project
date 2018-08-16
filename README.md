@@ -1,6 +1,7 @@
 STAGE 3 of the Restaurant Project
 
 V 1.2 Requires Changes FIXES
+
 -- Restaurant detail page not available while offline FIXED
 Added after the fetch the request to the cache and return the response.
 
