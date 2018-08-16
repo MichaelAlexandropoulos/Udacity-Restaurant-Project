@@ -7,6 +7,7 @@ Added after the fetch the request to the cache and return the response.
 
 
 V 1.1 Requires Changes FIXES
+
 --I'm able to mark a restaurant favorite while offline, and I can even "submit" a review and it will show up in the list, however, if I refresh the page before going back online, I get the dinosaur :/
 The app should behave offline exactly as it does online, except for maybe some UI to say "this review is pending until you reconnect" or something similar. FIXED
 
